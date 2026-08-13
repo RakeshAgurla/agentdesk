@@ -1,5 +1,7 @@
 # agentdesk
 
+[![ci](https://github.com/RakeshAgurla/agentdesk/actions/workflows/ci.yml/badge.svg)](https://github.com/RakeshAgurla/agentdesk/actions/workflows/ci.yml)
+
 A multi-agent pipeline that can fail properly.
 
 Most public agent repos demonstrate the happy path: three agents pass strings
@@ -8,7 +10,7 @@ the drafter invents a number" or "what stops this from costing $400 overnight".
 This one is built around those questions.
 
 ```bash
-git clone <this-repo> && cd agentdesk
+git clone https://github.com/RakeshAgurla/agentdesk.git && cd agentdesk
 pip install -e ".[dev]"
 python -m agentdesk.cli "why did gross margin decline"
 ```
