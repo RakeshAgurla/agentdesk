@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  push: { branches: [main] }
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: ruff check src tests
+      - run: pytest tests -q --cov=agentdesk --cov-report=term-missing
+
+  failure-paths:
+    # The failure paths are the product. If rejection, retry-ceiling, or budget
+    # enforcement stop working, that is a build failure, not a nice-to-have.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: pip }
+      - run: pip install -e ".[dev]"
+      - name: approved run exits 0
+        run: python -m agentdesk.cli "why did gross margin decline"
+      - name: unconvergeable run exits non-zero
+        run: |
+          if python -m agentdesk.cli "why did margin decline" --failure-mode always_bad; then
+            echo "expected non-zero exit"; exit 1
+          fi
+      - name: budget cap stops the run
+        run: |
+          if python -m agentdesk.cli "why did margin decline" --max-tokens 400; then
+            echo "expected non-zero exit"; exit 1
+          fi
